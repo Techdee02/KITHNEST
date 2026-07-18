@@ -1,0 +1,121 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces/wght.css';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+/* ---------------------------------------------------------------------
+   Kithnest design tokens.
+   This @theme block is the single source of truth for the visual
+   identity — colors, type, radius, shadow. Every screen pulls from
+   these Tailwind utilities rather than one-off values.
+   Palette: Marigold & Deep Teal.
+--------------------------------------------------------------------- */
+@theme {
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Marigold — primary */
+  --color-marigold-50: #fdf6e9;
+  --color-marigold-100: #fbebce;
+  --color-marigold-200: #f6d69d;
+  --color-marigold-300: #f0be6c;
+  --color-marigold-400: #ebae4f;
+  --color-marigold-500: #e8a33d;
+  --color-marigold-600: #c97f26;
+  --color-marigold-700: #a5641e;
+  --color-marigold-800: #7d4c18;
+  --color-marigold-900: #573512;
+
+  /* Teal — secondary */
+  --color-teal-50: #e7f1f0;
+  --color-teal-100: #c7e0dd;
+  --color-teal-200: #96c4bf;
+  --color-teal-300: #5a9c96;
+  --color-teal-400: #2f8078;
+  --color-teal-500: #1f6f6b;
+  --color-teal-600: #195b58;
+  --color-teal-700: #144846;
+  --color-teal-800: #0f3634;
+  --color-teal-900: #0a2523;
+
+  /* Coral — accent / alerts */
+  --color-coral-50: #fff1ef;
+  --color-coral-100: #ffdad5;
+  --color-coral-200: #ffb4aa;
+  --color-coral-300: #ff8f80;
+  --color-coral-400: #ff7c6b;
+  --color-coral-500: #ff6b5b;
+  --color-coral-600: #e85345;
+  --color-coral-700: #c13f33;
+  --color-coral-800: #942f26;
+  --color-coral-900: #642019;
+
+  /* Ink — warm neutrals (text + backgrounds), never cool/blue-gray */
+  --color-ink-50: #faf7f2;
+  --color-ink-100: #f1ebe1;
+  --color-ink-200: #e4dbcc;
+  --color-ink-300: #cfc3af;
+  --color-ink-400: #a99c89;
+  --color-ink-500: #7e7266;
+  --color-ink-600: #5c534a;
+  --color-ink-700: #443d36;
+  --color-ink-800: #2d2822;
+  --color-ink-900: #1a1a1a;
+
+  --shadow-warm-sm: 0 1px 2px rgba(45, 40, 34, 0.06), 0 1px 1px rgba(45, 40, 34, 0.04);
+  --shadow-warm-md: 0 4px 14px rgba(45, 40, 34, 0.08), 0 2px 4px rgba(45, 40, 34, 0.05);
+  --shadow-warm-lg: 0 12px 32px rgba(45, 40, 34, 0.12), 0 4px 10px rgba(45, 40, 34, 0.06);
+
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ink-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  #root {
+    min-height: 100svh;
+  }
+}
+
+@layer utilities {
+  .shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--color-ink-100) 30%,
+      var(--color-ink-200) 45%,
+      var(--color-ink-100) 60%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 120% 0;
+    }
+    100% {
+      background-position: -20% 0;
+    }
+  }
+}
