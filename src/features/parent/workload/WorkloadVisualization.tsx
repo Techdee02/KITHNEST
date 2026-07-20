@@ -144,7 +144,7 @@ export default function WorkloadVisualization() {
       </div>
 
       {visibleItems.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {visibleItems.map((item) => (
             <WorkloadCard key={item.id} item={item} />
           ))}

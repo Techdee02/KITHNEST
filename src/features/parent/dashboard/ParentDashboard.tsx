@@ -83,50 +83,52 @@ export default function ParentDashboard() {
         </Link>
       )}
 
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-base font-semibold text-ink-900">Today</h2>
-        </div>
-        {todayItems.length > 0 ? (
-          <div className="space-y-3">
-            {todayItems.map((item) => (
-              <WorkloadCard key={item.id} item={item} />
-            ))}
+      <div className="grid gap-7 lg:grid-cols-2">
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-base font-semibold text-ink-900">Today</h2>
           </div>
-        ) : (
-          <EmptyState
-            icon="check-circle"
-            title={todayCode === 'Sat' || todayCode === 'Sun' ? 'No school today' : 'All caught up for today'}
-            description={
-              todayCode === 'Sat' || todayCode === 'Sun'
-                ? 'Enjoy the weekend — the next school day picks up on Monday.'
-                : "Nothing new posted for today yet. We'll notify you the moment something comes in."
-            }
-          />
-        )}
-      </section>
+          {todayItems.length > 0 ? (
+            <div className="space-y-3">
+              {todayItems.map((item) => (
+                <WorkloadCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon="check-circle"
+              title={todayCode === 'Sat' || todayCode === 'Sun' ? 'No school today' : 'All caught up for today'}
+              description={
+                todayCode === 'Sat' || todayCode === 'Sun'
+                  ? 'Enjoy the weekend — the next school day picks up on Monday.'
+                  : "Nothing new posted for today yet. We'll notify you the moment something comes in."
+              }
+            />
+          )}
+        </section>
 
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-base font-semibold text-ink-900">Outstanding this week</h2>
-          <Link to="/parent/workload" className="text-xs font-semibold text-marigold-700">
-            See all
-          </Link>
-        </div>
-        {upcomingItems.length > 0 ? (
-          <div className="space-y-3">
-            {upcomingItems.map((item) => (
-              <WorkloadCard key={item.id} item={item} />
-            ))}
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-base font-semibold text-ink-900">Outstanding this week</h2>
+            <Link to="/parent/workload" className="text-xs font-semibold text-marigold-700">
+              See all
+            </Link>
           </div>
-        ) : (
-          <EmptyState
-            icon="check-circle"
-            title="Nothing outstanding"
-            description="Everything posted so far has been completed. Great work!"
-          />
-        )}
-      </section>
+          {upcomingItems.length > 0 ? (
+            <div className="space-y-3">
+              {upcomingItems.map((item) => (
+                <WorkloadCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon="check-circle"
+              title="Nothing outstanding"
+              description="Everything posted so far has been completed. Great work!"
+            />
+          )}
+        </section>
+      </div>
 
       <section>
         <div className="mb-3 flex items-center justify-between">

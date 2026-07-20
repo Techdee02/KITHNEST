@@ -14,7 +14,7 @@ export function ParentBottomNav() {
   const { unreadCount } = useParentData()
 
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-ink-100 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+    <nav className="sticky bottom-0 z-20 border-t border-ink-100 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)] lg:hidden">
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-2">
         {tabs.map((tab) => (
           <li key={tab.to} className="flex-1">

@@ -23,7 +23,7 @@ export function ParentTopBar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-ink-100 bg-ink-50/95 backdrop-blur">
-      <div className="mx-auto max-w-md px-5 pt-4">
+      <div className="mx-auto max-w-3xl px-5 pt-4 sm:px-8 lg:px-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Logomark className="h-6 w-6" />
