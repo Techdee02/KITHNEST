@@ -10,6 +10,7 @@ import { Badge } from '../../../design-system/components/Badge'
 import { Icon } from '../../../design-system/components/Icon'
 import { Button } from '../../../design-system/components/Button'
 import { Skeleton } from '../../../design-system/components/Skeleton'
+import { AiInsightCard } from '../../../design-system/components/AiInsightCard'
 import pupilAvatar from '../../../assets/images/pupil-avatar.webp'
 
 export default function ChildProfile() {
@@ -39,6 +40,25 @@ export default function ChildProfile() {
       .filter((row) => row.total > 0)
     return grouped
   }, [workloadForSelectedPupil])
+
+  const insightContext = useMemo(
+    () => ({
+      pupil: selectedPupil?.preferredName,
+      completion,
+      subjectBreakdown: subjectBreakdown.map(({ subject, total, completed }) => ({
+        subject: subject.name,
+        completed,
+        total,
+      })),
+      overdue: workloadForSelectedPupil
+        .filter((i) => i.status === 'overdue')
+        .map((i) => ({ title: i.title, dueDate: i.dueDate })),
+      upcoming: workloadForSelectedPupil
+        .filter((i) => i.status === 'upcoming')
+        .map((i) => ({ title: i.title, dueDate: i.dueDate })),
+    }),
+    [selectedPupil, completion, subjectBreakdown, workloadForSelectedPupil],
+  )
 
   const achievements = notifications.filter(
     (n) => n.category === 'achievement' && n.title.includes(selectedPupil?.preferredName ?? ''),
@@ -95,6 +115,13 @@ export default function ChildProfile() {
           </p>
         </div>
       </Card>
+
+      <AiInsightCard
+        kind="parent_progress"
+        title="AI summary"
+        context={insightContext}
+        showVoiceButton
+      />
 
       {subjectBreakdown.length > 0 && (
         <Card className="p-5">

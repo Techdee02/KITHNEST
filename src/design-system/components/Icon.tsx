@@ -31,6 +31,8 @@ export type IconName =
   | 'book'
   | 'shield'
   | 'copy'
+  | 'send'
+  | 'volume'
 
 const paths: Record<IconName, ReactElement> = {
   home: (
@@ -194,6 +196,19 @@ const paths: Record<IconName, ReactElement> = {
     <>
       <rect x="8.5" y="8.5" width="11" height="11" rx="2" />
       <path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </>
+  ),
+  send: (
+    <>
+      <path d="M4.5 12 19.5 4.5 15 19.5l-3.5-6.5L4.5 12Z" />
+      <path d="M11.5 13 15 19.5" />
+    </>
+  ),
+  volume: (
+    <>
+      <path d="M5 9.5h3l4.5-4v13l-4.5-4H5z" />
+      <path d="M15.5 9a4 4 0 0 1 0 6" />
+      <path d="M18 6.5a8 8 0 0 1 0 11" />
     </>
   ),
 }

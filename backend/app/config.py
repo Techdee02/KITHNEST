@@ -25,5 +25,12 @@ class Settings(BaseSettings):
     supabase_service_role_key: str | None = None
     supabase_storage_bucket: str = 'school-logos'
 
+    # AI insights + chat — Groq's OpenAI-compatible endpoint.
+    groq_api_key: str | None = None
+    groq_model: str = 'openai/gpt-oss-120b'
+
+    # Voice summaries — YarnGPT (https://yarngpt.ai/api-docs).
+    yarngpt_api_key: str | None = None
+
 
 settings = Settings()

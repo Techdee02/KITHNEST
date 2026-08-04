@@ -1,7 +1,7 @@
 // Relative by default so it works over the Vite dev proxy regardless of
 // where the frontend itself is being accessed from (localhost, a Codespace
 // forwarded URL, a deployed origin, etc.) — see vite.config.ts's `server.proxy`.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
 export class ApiError extends Error {
   status: number

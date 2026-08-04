@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSchoolData } from '../context/SchoolDataContext'
@@ -10,6 +10,7 @@ import { Skeleton } from '../../../design-system/components/Skeleton'
 import { rosterForClass } from '../../../fixtures/rosterEntries'
 import { Badge } from '../../../design-system/components/Badge'
 import { PostUpdateModal } from '../components/PostUpdateModal'
+import { AiInsightCard } from '../../../design-system/components/AiInsightCard'
 
 export default function SchoolAdminDashboard() {
   const { school, classes, metrics, totalConnectedParents, totalPupils, uploadLogo, isUploadingLogo } =
@@ -22,6 +23,25 @@ export default function SchoolAdminDashboard() {
   useEffect(() => {
     fakeFetch(true, { delayMs: 600 }).then(() => setIsLoading(false))
   }, [])
+
+  const insightContext = useMemo(
+    () => ({
+      school: school?.name,
+      totalConnectedParents,
+      totalPupils,
+      metrics: metrics.map((m) => ({ label: m.label, value: m.value, trend: m.trend })),
+      classes: classes.map((cls) => {
+        const roster = rosterForClass(cls.id)
+        return {
+          name: cls.name,
+          teacher: cls.teacherName,
+          activeParents: roster.filter((r) => r.status === 'active').length,
+          totalParents: roster.length,
+        }
+      }),
+    }),
+    [school, totalConnectedParents, totalPupils, metrics, classes],
+  )
 
   if (isLoading || !school) {
     return (
@@ -135,6 +155,8 @@ export default function SchoolAdminDashboard() {
             </Card>
           ))}
         </div>
+
+        <AiInsightCard kind="school_engagement" title="AI summary" context={insightContext} />
 
         <div>
           <h2 className="mb-4 font-display text-base font-semibold text-ink-900">Classes</h2>
