@@ -16,8 +16,15 @@ import { Card } from '../../../design-system/components/Card'
 const WEEKDAY_MAP = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
 export default function ParentDashboard() {
-  const { parentName, selectedPupil, classNameForPupil, workloadForSelectedPupil, notifications, markNotificationRead } =
-    useParentData()
+  const {
+    parentName,
+    selectedPupil,
+    classNameForPupil,
+    workloadForSelectedPupil,
+    notifications,
+    markNotificationRead,
+    isLoadingNotifications,
+  } = useParentData()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -33,7 +40,7 @@ export default function ParentDashboard() {
     .slice(0, 3)
   const recentNotifications = notifications.slice(0, 2)
 
-  if (isLoading) {
+  if (isLoading || isLoadingNotifications) {
     return (
       <div className="space-y-6">
         <div className="space-y-2">

@@ -7,6 +7,20 @@ export interface School {
   motto: string
 }
 
+/** A real, backend-registered school — distinct from the `School` mock fixture shape above. */
+export interface RegisteredSchool {
+  id: string
+  name: string
+  shortName: string
+  code: string
+  location: string
+  motto: string | null
+  adminName: string
+  adminEmail: string
+  logoUrl: string | null
+  createdAt: string
+}
+
 export interface ClassRoom {
   id: string
   schoolId: string

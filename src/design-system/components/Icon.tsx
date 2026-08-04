@@ -30,6 +30,7 @@ export type IconName =
   | 'sparkle'
   | 'book'
   | 'shield'
+  | 'copy'
 
 const paths: Record<IconName, ReactElement> = {
   home: (
@@ -188,6 +189,12 @@ const paths: Record<IconName, ReactElement> = {
   ),
   shield: (
     <path d="M12 3.5 19 6v6c0 4.5-3 7.5-7 8.5-4-1-7-4-7-8.5V6Z" />
+  ),
+  copy: (
+    <>
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2" />
+      <path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </>
   ),
 }
 

@@ -1,13 +1,61 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import { defaultSchool } from '../../../fixtures/schools'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { defaultParent } from '../../../fixtures/parents'
 import { pupils as allPupils } from '../../../fixtures/pupils'
 import { classes as allClasses } from '../../../fixtures/classes'
 import { workloadForPupil } from '../../../fixtures/workloadItems'
-import { notificationsForParent } from '../../../fixtures/notifications'
 import { fakeFetch } from '../../../lib/fakeFetch'
+import { apiFetch, ApiError } from '../../../lib/apiClient'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import type { NotificationItem, Pupil, WorkloadItem } from '../../../lib/types'
+
+interface LinkedSchool {
+  name: string
+  shortName: string
+  code: string
+  location: string
+  logoUrl: string | null
+}
+
+interface SchoolPublicApiResponse {
+  name: string
+  short_name: string
+  code: string
+  location: string
+  logo_url: string | null
+}
+
+interface UpdateApiResponse {
+  id: string
+  school_id: string
+  title: string
+  body: string
+  category: string
+  channel: string
+  created_at: string
+}
+
+function mapLinkedSchool(data: SchoolPublicApiResponse): LinkedSchool {
+  return {
+    name: data.name,
+    shortName: data.short_name,
+    code: data.code,
+    location: data.location,
+    logoUrl: data.logo_url,
+  }
+}
+
+function mapUpdate(data: UpdateApiResponse): NotificationItem {
+  return {
+    id: data.id,
+    parentId: 'linked-school-parent',
+    title: data.title,
+    body: data.body,
+    timestamp: data.created_at,
+    category: data.category as NotificationItem['category'],
+    channel: data.channel as NotificationItem['channel'],
+    read: false,
+  }
+}
 
 interface ParentDataValue {
   isAuthenticated: boolean
@@ -15,6 +63,8 @@ interface ParentDataValue {
   loginError: string | null
   login: (schoolCode: string, phone: string) => Promise<boolean>
   logout: () => void
+
+  linkedSchool: LinkedSchool | null
 
   parentName: string
   pupils: Pupil[]
@@ -25,8 +75,10 @@ interface ParentDataValue {
   workloadForSelectedPupil: WorkloadItem[]
 
   notifications: NotificationItem[]
+  isLoadingNotifications: boolean
   unreadCount: number
   markNotificationRead: (id: string) => void
+  refreshNotifications: () => void
 
   lastSyncedAt: string
   isOffline: boolean
@@ -41,6 +93,8 @@ const ParentDataContext = createContext<ParentDataValue | null>(null)
 
 export function ParentDataProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useLocalStorageState('kithnest.parent.authed', false)
+  const [schoolCode, setSchoolCode] = useLocalStorageState<string | null>('kithnest.parent.schoolCode', null)
+  const [linkedSchool, setLinkedSchool] = useState<LinkedSchool | null>(null)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
 
@@ -54,6 +108,10 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     {},
   )
 
+  const [realNotifications, setRealNotifications] = useState<NotificationItem[]>([])
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false)
+  const [notificationsFetchToken, setNotificationsFetchToken] = useState(0)
+
   const [lastSyncedAt, setLastSyncedAt] = useLocalStorageState(
     'kithnest.parent.lastSynced',
     '2026-07-18T08:12:00',
@@ -62,38 +120,66 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
 
+  // Resolve the linked school (and its real updates) whenever we have a
+  // school code but haven't loaded its details yet — covers both a fresh
+  // login and a page reload where only the code survived in localStorage.
+  useEffect(() => {
+    if (!schoolCode) return
+
+    apiFetch<SchoolPublicApiResponse>(`/schools/lookup/${schoolCode}`)
+      .then((data) => setLinkedSchool(mapLinkedSchool(data)))
+      .catch(() => {
+        // The stored code no longer resolves (school deleted, typo survived
+        // a refresh, etc.) — don't leave the parent stuck on broken data.
+        setSchoolCode(null)
+        setIsAuthenticated(false)
+      })
+
+    setIsLoadingNotifications(true)
+    apiFetch<UpdateApiResponse[]>(`/schools/lookup/${schoolCode}/updates`)
+      .then((data) => setRealNotifications(data.map(mapUpdate)))
+      .catch(() => setRealNotifications([]))
+      .finally(() => setIsLoadingNotifications(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schoolCode, notificationsFetchToken])
+
   const login = useCallback(
-    async (schoolCode: string, phone: string) => {
+    async (code: string, phone: string) => {
       setLoginError(null)
       setIsLoggingIn(true)
       try {
-        await fakeFetch(true, { delayMs: 900 })
-        const codeMatches = schoolCode.trim().toUpperCase() === defaultSchool.code
+        const normalizedCode = code.trim().toUpperCase()
         const phoneDigits = phone.replace(/\D/g, '')
         const phoneValid = phoneDigits.length >= 10
 
-        if (!codeMatches) {
-          setLoginError("We couldn't find a school with that code. Double-check it and try again.")
-          return false
-        }
         if (!phoneValid) {
           setLoginError('Enter the phone number registered with your school.')
           return false
         }
 
+        const data = await apiFetch<SchoolPublicApiResponse>(`/schools/lookup/${normalizedCode}`)
+        setLinkedSchool(mapLinkedSchool(data))
+        setSchoolCode(normalizedCode)
         setIsAuthenticated(true)
         setLastSyncedAt(new Date().toISOString())
         return true
+      } catch (err) {
+        setLoginError(
+          err instanceof ApiError ? err.message : "We couldn't find a school with that code. Double-check it and try again.",
+        )
+        return false
       } finally {
         setIsLoggingIn(false)
       }
     },
-    [setIsAuthenticated, setLastSyncedAt],
+    [setIsAuthenticated, setSchoolCode, setLastSyncedAt],
   )
 
   const logout = useCallback(() => {
     setIsAuthenticated(false)
-  }, [setIsAuthenticated])
+    setSchoolCode(null)
+    setLinkedSchool(null)
+  }, [setIsAuthenticated, setSchoolCode])
 
   const pupils = useMemo(
     () => allPupils.filter((p) => defaultParent.pupilIds.includes(p.id)),
@@ -117,9 +203,10 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
   )
 
   const notifications = useMemo(() => {
-    const base = notificationsForParent(defaultParent.id)
-    return base.map((n) => ({ ...n, read: readOverrides[n.id] ?? n.read }))
-  }, [readOverrides])
+    return realNotifications
+      .map((n) => ({ ...n, read: readOverrides[n.id] ?? n.read }))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  }, [realNotifications, readOverrides])
 
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications])
 
@@ -130,6 +217,8 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     [setReadOverrides],
   )
 
+  const refreshNotifications = useCallback(() => setNotificationsFetchToken((t) => t + 1), [])
+
   const toggleOffline = useCallback(() => setIsOffline((v) => !v), [])
 
   const syncNow = useCallback(async () => {
@@ -137,14 +226,15 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     setIsSyncing(true)
     setSyncError(null)
     try {
-      await fakeFetch(true, { delayMs: 1100, failRate: 0.3 })
+      await fakeFetch(true, { delayMs: 600 })
+      refreshNotifications()
       setLastSyncedAt(new Date().toISOString())
     } catch {
       setSyncError("Couldn't sync — check your connection and try again.")
     } finally {
       setIsSyncing(false)
     }
-  }, [isOffline, setLastSyncedAt])
+  }, [isOffline, setLastSyncedAt, refreshNotifications])
 
   const dismissSyncError = useCallback(() => setSyncError(null), [])
 
@@ -154,6 +244,7 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     loginError,
     login,
     logout,
+    linkedSchool,
     parentName: defaultParent.name,
     pupils,
     selectedPupilId: selectedPupil?.id ?? selectedPupilId,
@@ -162,8 +253,10 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     classNameForPupil,
     workloadForSelectedPupil,
     notifications,
+    isLoadingNotifications,
     unreadCount,
     markNotificationRead,
+    refreshNotifications,
     lastSyncedAt,
     isOffline,
     toggleOffline,

@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Modal } from '../../../design-system/components/Modal'
 import { Button } from '../../../design-system/components/Button'
 import { Icon } from '../../../design-system/components/Icon'
-import { fakeFetch } from '../../../lib/fakeFetch'
-import { totalConnectedParents } from '../../../fixtures/engagementMetrics'
+import { useSchoolData } from '../context/SchoolDataContext'
 
 export function PostUpdateModal({ open, onClose, kind }: { open: boolean; onClose: () => void; kind: 'update' | 'workload' }) {
+  const { postUpdate, isPostingUpdate, postUpdateError, totalConnectedParents } = useSchoolData()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [status, setStatus] = useState<'idle' | 'sent'>('idle')
 
   function handleClose() {
     setStatus('idle')
@@ -18,9 +18,12 @@ export function PostUpdateModal({ open, onClose, kind }: { open: boolean; onClos
   }
 
   async function handleSend() {
-    setStatus('sending')
-    await fakeFetch(true, { delayMs: 900 })
-    setStatus('sent')
+    const success = await postUpdate({
+      title,
+      body,
+      category: kind === 'workload' ? 'workload' : 'announcement',
+    })
+    if (success) setStatus('sent')
   }
 
   return (
@@ -34,8 +37,9 @@ export function PostUpdateModal({ open, onClose, kind }: { open: boolean; onClos
             {kind === 'update' ? 'Update sent' : 'Workload posted'}
           </p>
           <p className="text-sm text-ink-500">
-            Delivered to {totalConnectedParents} connected parents, in-app and via SMS for critical
-            items.
+            Live now for any parent linked to your school code
+            {totalConnectedParents ? `, ${totalConnectedParents} connected` : ''}. Real SMS delivery
+            is a Phase 2 follow-up.
           </p>
           <Button onClick={handleClose} className="mt-2">
             Done
@@ -62,11 +66,17 @@ export function PostUpdateModal({ open, onClose, kind }: { open: boolean; onClos
               className="w-full rounded-2xl border border-ink-200 px-4 py-3 text-sm text-ink-900 placeholder:text-ink-300 focus:border-marigold-400 focus:outline-none focus:ring-2 focus:ring-marigold-100"
             />
           </div>
+          {postUpdateError && (
+            <div className="flex items-start gap-2 rounded-xl bg-coral-50 px-3.5 py-3 text-sm text-coral-700">
+              <Icon name="alert" className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{postUpdateError}</span>
+            </div>
+          )}
           <p className="text-xs text-ink-400">
-            This is a Phase 1 preview — sending here won&apos;t deliver a real notification yet.
+            This posts for real — any parent signed in with your school code will see it.
           </p>
-          <Button fullWidth disabled={status === 'sending' || !title} onClick={handleSend}>
-            {status === 'sending' ? 'Sending…' : kind === 'update' ? 'Send update' : 'Post workload'}
+          <Button fullWidth disabled={isPostingUpdate || !title || !body} onClick={handleSend}>
+            {isPostingUpdate ? 'Sending…' : kind === 'update' ? 'Send update' : 'Post workload'}
           </Button>
         </div>
       )}

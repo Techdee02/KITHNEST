@@ -1,20 +1,82 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
-import { defaultSchool } from '../../../fixtures/schools'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { classes as allClasses } from '../../../fixtures/classes'
 import { rosterForClass } from '../../../fixtures/rosterEntries'
 import { engagementMetrics, totalConnectedParents, totalPupils } from '../../../fixtures/engagementMetrics'
-import { fakeFetch } from '../../../lib/fakeFetch'
+import { apiFetch, ApiError, resolveApiUrl } from '../../../lib/apiClient'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
-import type { ClassRoom, RosterEntry } from '../../../lib/types'
+import type { ClassRoom, RegisteredSchool, RosterEntry } from '../../../lib/types'
+
+export interface SchoolRegisterInput {
+  name: string
+  shortName: string
+  location: string
+  motto?: string
+  adminName: string
+  adminEmail: string
+  password: string
+}
+
+interface SchoolApiResponse {
+  id: string
+  name: string
+  short_name: string
+  code: string
+  location: string
+  motto: string | null
+  admin_name: string
+  admin_email: string
+  logo_url: string | null
+  created_at: string
+}
+
+interface TokenResponse {
+  school: SchoolApiResponse
+  access_token: string
+}
+
+function mapSchool(data: SchoolApiResponse): RegisteredSchool {
+  return {
+    id: data.id,
+    name: data.name,
+    shortName: data.short_name,
+    code: data.code,
+    location: data.location,
+    motto: data.motto,
+    adminName: data.admin_name,
+    adminEmail: data.admin_email,
+    logoUrl: data.logo_url ? resolveApiUrl(data.logo_url) : null,
+    createdAt: data.created_at,
+  }
+}
+
+export interface PostUpdateInput {
+  title: string
+  body: string
+  category?: 'announcement' | 'workload' | 'achievement' | 'reminder'
+  channel?: 'app' | 'sms'
+}
 
 interface SchoolDataValue {
+  // Auth/session — real, backed by the FastAPI + Postgres backend.
   isAuthenticated: boolean
-  isLoggingIn: boolean
-  loginError: string | null
-  login: (schoolCode: string, password: string) => Promise<boolean>
+  isLoadingProfile: boolean
+  isSubmitting: boolean
+  authError: string | null
+  register: (input: SchoolRegisterInput) => Promise<boolean>
+  login: (email: string, password: string) => Promise<boolean>
   logout: () => void
 
-  school: typeof defaultSchool
+  school: RegisteredSchool | null
+  uploadLogo: (file: File) => Promise<boolean>
+  isUploadingLogo: boolean
+  logoError: string | null
+
+  postUpdate: (input: PostUpdateInput) => Promise<boolean>
+  isPostingUpdate: boolean
+  postUpdateError: string | null
+
+  // Operational data — still Phase 1 mock fixtures. Real classes/roster/
+  // engagement data is a follow-up phase, scoped out of school registration.
   classes: ClassRoom[]
   selectedClassId: string | 'all'
   selectClass: (id: string | 'all') => void
@@ -27,42 +89,142 @@ interface SchoolDataValue {
 const SchoolDataContext = createContext<SchoolDataValue | null>(null)
 
 export function SchoolDataProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useLocalStorageState('kithnest.school.authed', false)
-  const [isLoggingIn, setIsLoggingIn] = useState(false)
-  const [loginError, setLoginError] = useState<string | null>(null)
+  const [token, setToken] = useLocalStorageState<string | null>('kithnest.school.token', null)
+  const [school, setSchool] = useState<RegisteredSchool | null>(null)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [logoError, setLogoError] = useState<string | null>(null)
+  const [isPostingUpdate, setIsPostingUpdate] = useState(false)
+  const [postUpdateError, setPostUpdateError] = useState<string | null>(null)
+
   const [selectedClassId, setSelectedClassId] = useLocalStorageState<string | 'all'>(
     'kithnest.school.selectedClass',
     'all',
   )
 
-  const login = useCallback(
-    async (schoolCode: string, password: string) => {
-      setLoginError(null)
-      setIsLoggingIn(true)
+  useEffect(() => {
+    if (!token || school) return
+    setIsLoadingProfile(true)
+    apiFetch<SchoolApiResponse>('/schools/me', { token })
+      .then((data) => setSchool(mapSchool(data)))
+      .catch(() => {
+        // Stored token is stale/invalid — drop it and send them back to login.
+        setToken(null)
+      })
+      .finally(() => setIsLoadingProfile(false))
+  }, [token, school, setToken])
+
+  const register = useCallback(
+    async (input: SchoolRegisterInput) => {
+      setAuthError(null)
+      setIsSubmitting(true)
       try {
-        await fakeFetch(true, { delayMs: 900 })
-        const codeMatches = schoolCode.trim().toUpperCase() === defaultSchool.code
-        const passwordValid = password.trim().length >= 4
-
-        if (!codeMatches) {
-          setLoginError("We couldn't find a school with that code. Contact Kithnest support if this persists.")
-          return false
-        }
-        if (!passwordValid) {
-          setLoginError('Enter your admin password (at least 4 characters for this demo).')
-          return false
-        }
-
-        setIsAuthenticated(true)
+        const data = await apiFetch<TokenResponse>('/schools/register', {
+          method: 'POST',
+          body: {
+            name: input.name,
+            short_name: input.shortName,
+            location: input.location,
+            motto: input.motto || undefined,
+            admin_name: input.adminName,
+            admin_email: input.adminEmail,
+            password: input.password,
+          },
+        })
+        setSchool(mapSchool(data.school))
+        setToken(data.access_token)
         return true
+      } catch (err) {
+        setAuthError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+        return false
       } finally {
-        setIsLoggingIn(false)
+        setIsSubmitting(false)
       }
     },
-    [setIsAuthenticated],
+    [setToken],
   )
 
-  const logout = useCallback(() => setIsAuthenticated(false), [setIsAuthenticated])
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setAuthError(null)
+      setIsSubmitting(true)
+      try {
+        const data = await apiFetch<TokenResponse>('/schools/login', {
+          method: 'POST',
+          body: { admin_email: email, password },
+        })
+        setSchool(mapSchool(data.school))
+        setToken(data.access_token)
+        return true
+      } catch (err) {
+        setAuthError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+        return false
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    [setToken],
+  )
+
+  const logout = useCallback(() => {
+    setToken(null)
+    setSchool(null)
+  }, [setToken])
+
+  const uploadLogo = useCallback(
+    async (file: File) => {
+      if (!token) return false
+      setLogoError(null)
+      setIsUploadingLogo(true)
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const data = await apiFetch<SchoolApiResponse>('/schools/me/logo', {
+          method: 'POST',
+          token,
+          body: formData,
+          isFormData: true,
+        })
+        setSchool(mapSchool(data))
+        return true
+      } catch (err) {
+        setLogoError(err instanceof ApiError ? err.message : 'Could not upload the logo. Please try again.')
+        return false
+      } finally {
+        setIsUploadingLogo(false)
+      }
+    },
+    [token],
+  )
+
+  const postUpdate = useCallback(
+    async (input: PostUpdateInput) => {
+      if (!token) return false
+      setPostUpdateError(null)
+      setIsPostingUpdate(true)
+      try {
+        await apiFetch('/schools/me/updates', {
+          method: 'POST',
+          token,
+          body: {
+            title: input.title,
+            body: input.body,
+            category: input.category ?? 'announcement',
+            channel: input.channel ?? 'app',
+          },
+        })
+        return true
+      } catch (err) {
+        setPostUpdateError(err instanceof ApiError ? err.message : 'Could not post that update. Please try again.')
+        return false
+      } finally {
+        setIsPostingUpdate(false)
+      }
+    },
+    [token],
+  )
 
   const rosterForSelectedClass = useMemo(() => {
     if (selectedClassId === 'all') {
@@ -72,12 +234,20 @@ export function SchoolDataProvider({ children }: { children: ReactNode }) {
   }, [selectedClassId])
 
   const value: SchoolDataValue = {
-    isAuthenticated,
-    isLoggingIn,
-    loginError,
+    isAuthenticated: Boolean(token),
+    isLoadingProfile,
+    isSubmitting,
+    authError,
+    register,
     login,
     logout,
-    school: defaultSchool,
+    school,
+    uploadLogo,
+    isUploadingLogo,
+    logoError,
+    postUpdate,
+    isPostingUpdate,
+    postUpdateError,
     classes: allClasses,
     selectedClassId,
     selectClass: setSelectedClassId,

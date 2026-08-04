@@ -10,11 +10,10 @@ import { Badge } from '../../../design-system/components/Badge'
 import { Icon } from '../../../design-system/components/Icon'
 import { Button } from '../../../design-system/components/Button'
 import { Skeleton } from '../../../design-system/components/Skeleton'
-import { defaultSchool } from '../../../fixtures/schools'
 import pupilAvatar from '../../../assets/images/pupil-avatar.webp'
 
 export default function ChildProfile() {
-  const { parentName, selectedPupil, classNameForPupil, workloadForSelectedPupil, notifications, logout } =
+  const { parentName, selectedPupil, classNameForPupil, workloadForSelectedPupil, notifications, logout, linkedSchool } =
     useParentData()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
@@ -82,7 +81,7 @@ export default function ChildProfile() {
         <div>
           <h1 className="font-display text-xl font-semibold text-ink-900">{selectedPupil.name}</h1>
           <p className="text-sm text-ink-500">{classNameForPupil(selectedPupil)}</p>
-          <p className="text-xs text-ink-400">{defaultSchool.shortName}</p>
+          <p className="text-xs text-ink-400">{linkedSchool?.shortName}</p>
         </div>
       </div>
 
@@ -144,11 +143,11 @@ export default function ChildProfile() {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-ink-500">School</span>
-            <span className="font-medium text-ink-800">{defaultSchool.shortName}</span>
+            <span className="font-medium text-ink-800">{linkedSchool?.shortName}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-ink-500">School code</span>
-            <Badge tone="neutral">{defaultSchool.code}</Badge>
+            <Badge tone="neutral">{linkedSchool?.code}</Badge>
           </div>
         </div>
         <Button variant="outline" fullWidth className="mt-5" onClick={handleLogout}>

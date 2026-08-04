@@ -11,6 +11,7 @@ import NotificationsFeed from './features/parent/notifications/NotificationsFeed
 import ChildProfile from './features/parent/profile/ChildProfile'
 
 import SchoolLogin from './features/school/login/SchoolLogin'
+import SchoolSignup from './features/school/signup/SchoolSignup'
 import SchoolLayout from './features/school/layout/SchoolLayout'
 import SchoolAdminDashboard from './features/school/dashboard/SchoolAdminDashboard'
 import ParentRoster from './features/school/roster/ParentRoster'
@@ -38,6 +39,7 @@ function App() {
           </Route>
 
           <Route path="/school/login" element={<SchoolLogin />} />
+          <Route path="/school/signup" element={<SchoolSignup />} />
           <Route
             path="/school"
             element={

@@ -9,7 +9,7 @@ import { EmptyState } from '../../../design-system/components/EmptyState'
 import { cn } from '../../../design-system/cn'
 
 export default function NotificationsFeed() {
-  const { notifications, markNotificationRead, unreadCount } = useParentData()
+  const { notifications, markNotificationRead, unreadCount, isLoadingNotifications } = useParentData()
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
@@ -19,7 +19,7 @@ export default function NotificationsFeed() {
 
   const visible = filter === 'unread' ? notifications.filter((n) => !n.read) : notifications
 
-  if (isLoading) {
+  if (isLoading || isLoadingNotifications) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-6 w-32" />

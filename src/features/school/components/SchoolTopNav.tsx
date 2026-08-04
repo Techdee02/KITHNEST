@@ -49,7 +49,7 @@ export function SchoolTopNav() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="hidden text-sm text-ink-500 sm:inline">{school.shortName}</span>
+          <span className="hidden text-sm text-ink-500 sm:inline">{school?.shortName}</span>
           <button
             type="button"
             onClick={handleLogout}

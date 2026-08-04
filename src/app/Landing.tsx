@@ -31,7 +31,7 @@ const PILLARS: { icon: IconName; tone: 'marigold' | 'teal' | 'coral'; title: str
 const STEPS = [
   {
     title: 'School posts',
-    body: 'A teacher or admin posts a workload item or update in seconds, with no extra admin work.',
+    body: 'A teacher or admin posts a workload item or update in seconds, with no extra work.',
   },
   {
     title: 'Parents are notified',
@@ -271,7 +271,7 @@ export default function Landing() {
             <Wordmark className="text-base" />
           </div>
           <p className="text-xs text-ink-400">
-            Kithnest Phase 1 demo · Team 6, Intellect Fellowship
+            Kithnest Phase 1 demo · Team 6, Intellect Africa Fellowship
           </p>
         </div>
       </footer>

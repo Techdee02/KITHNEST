@@ -18,6 +18,7 @@ export function ParentTopBar() {
     isSyncing,
     syncNow,
     toggleOffline,
+    linkedSchool,
   } = useParentData()
   const [switcherOpen, setSwitcherOpen] = useState(false)
 
@@ -55,7 +56,7 @@ export function ParentTopBar() {
               <p className="font-display text-base font-semibold text-ink-900">
                 {selectedPupil?.preferredName}
               </p>
-              <p className="text-xs text-ink-500">Bright Kids Nursery &amp; Primary</p>
+              <p className="text-xs text-ink-500">{linkedSchool?.shortName}</p>
             </div>
             {pupils.length > 1 && (
               <Icon

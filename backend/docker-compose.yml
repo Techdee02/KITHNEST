@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kithnest
+      POSTGRES_PASSWORD: kithnest
+      POSTGRES_DB: kithnest
+    ports:
+      - '5433:5432'
+    volumes:
+      - kithnest_pg_data:/var/lib/postgresql/data
+
+volumes:
+  kithnest_pg_data:

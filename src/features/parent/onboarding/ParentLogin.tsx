@@ -10,8 +10,8 @@ import { Logomark } from '../../../design-system/components/Logomark'
 export default function ParentLogin() {
   const { login, isLoggingIn, loginError } = useParentData()
   const navigate = useNavigate()
-  const [schoolCode, setSchoolCode] = useState('BKL204')
-  const [phone, setPhone] = useState('0803 214 7765')
+  const [schoolCode, setSchoolCode] = useState('')
+  const [phone, setPhone] = useState('')
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -57,7 +57,7 @@ export default function ParentLogin() {
               id="schoolCode"
               value={schoolCode}
               onChange={(e) => setSchoolCode(e.target.value.toUpperCase())}
-              placeholder="e.g. BKL204"
+              placeholder="e.g. ISUO393"
               autoComplete="off"
               className="w-full rounded-2xl border border-ink-200 bg-white px-4 py-3.5 font-mono text-lg tracking-widest text-ink-900 placeholder:text-ink-300 focus:border-marigold-400 focus:outline-none focus:ring-2 focus:ring-marigold-100"
             />
@@ -99,7 +99,7 @@ export default function ParentLogin() {
           </Button>
 
           <p className="text-center text-xs text-ink-400">
-            Demo credentials are pre-filled — clear a field to see what an error looks like.
+            Any phone number works for this demo — the school code is what's checked for real.
           </p>
         </form>
       </div>
