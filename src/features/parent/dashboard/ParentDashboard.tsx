@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useParentData } from '../context/ParentDataContext'
 import { fakeFetch } from '../../../lib/fakeFetch'
 import { timeOfDayGreeting } from '../../../lib/greeting'
 import { firstNameOf } from '../../../lib/parentName'
+import { subjects } from '../../../fixtures/subjects'
 import { WorkloadCard } from '../components/WorkloadCard'
 import { NotificationRow } from '../components/NotificationRow'
 import { SkeletonCard } from '../../../design-system/components/Skeleton'
@@ -12,6 +13,7 @@ import { Skeleton } from '../../../design-system/components/Skeleton'
 import { EmptyState } from '../../../design-system/components/EmptyState'
 import { Icon } from '../../../design-system/components/Icon'
 import { Card } from '../../../design-system/components/Card'
+import { AiInsightCard } from '../../../design-system/components/AiInsightCard'
 
 const WEEKDAY_MAP = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
@@ -39,6 +41,33 @@ export default function ParentDashboard() {
     .filter((item) => item.status === 'upcoming')
     .slice(0, 3)
   const recentNotifications = notifications.slice(0, 2)
+
+  const completion = useMemo(() => {
+    const total = workloadForSelectedPupil.length
+    const completed = workloadForSelectedPupil.filter((i) => i.status === 'completed').length
+    return total === 0 ? 0 : Math.round((completed / total) * 100)
+  }, [workloadForSelectedPupil])
+
+  const subjectBreakdown = useMemo(() => {
+    return subjects
+      .map((subject) => {
+        const items = workloadForSelectedPupil.filter((i) => i.subjectId === subject.id)
+        const completed = items.filter((i) => i.status === 'completed').length
+        return { subject: subject.name, total: items.length, completed }
+      })
+      .filter((row) => row.total > 0)
+  }, [workloadForSelectedPupil])
+
+  const insightContext = useMemo(
+    () => ({
+      pupil: selectedPupil?.preferredName,
+      completion,
+      subjectBreakdown,
+      overdue: overdueItems.map((i) => ({ title: i.title, dueDate: i.dueDate })),
+      upcoming: upcomingItems.map((i) => ({ title: i.title, dueDate: i.dueDate })),
+    }),
+    [selectedPupil, completion, subjectBreakdown, overdueItems, upcomingItems],
+  )
 
   if (isLoading || isLoadingNotifications) {
     return (
@@ -71,6 +100,8 @@ export default function ParentDashboard() {
           </p>
         )}
       </div>
+
+      <AiInsightCard kind="parent_progress" title="AI summary" context={insightContext} showVoiceButton />
 
       {overdueItems.length > 0 && (
         <Link
