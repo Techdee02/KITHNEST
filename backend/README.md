@@ -16,8 +16,30 @@ develops against a single plain Postgres container and has FastAPI own auth
 directly (bcrypt + JWT) instead of delegating to GoTrue. Going live later means
 pointing `DATABASE_URL` at the real Supabase Postgres connection string — no
 application code changes. Logo storage is behind a `StorageBackend` interface
-(`app/storage.py`) for the same reason: `LocalDiskStorage` today, a
-`SupabaseStorage` implementation swapped in later.
+(`app/storage.py`): `LocalDiskStorage` is used automatically in local dev;
+`SupabaseStorage` (implemented, uploads via the Storage REST API) is used
+automatically once `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are set —
+see `.env.example`. No code change either way.
+
+## Deploying for real (Render + Supabase)
+
+1. **Supabase**: create a project, then use its **connection pooler** string
+   (Settings → Database → Connection Pooling, port 6543) as `DATABASE_URL`,
+   scheme changed to `postgresql+asyncpg://`. Run `alembic upgrade head`
+   once, pointed at that URL, to create the tables. Create a **public**
+   Storage bucket named `school-logos` (Storage → New bucket) — this repo
+   never creates the bucket itself.
+2. **Render**: New Web Service → this repo, **Root Directory** `backend`,
+   Build Command `pip install -r requirements.txt`, Start Command
+   `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, health check path
+   `/api/health`. Set `DATABASE_URL`, a real random `JWT_SECRET`,
+   `FRONTEND_ORIGIN` (wherever the frontend is deployed), `SUPABASE_URL`,
+   and `SUPABASE_SERVICE_ROLE_KEY` (from Supabase Settings → API — the
+   `service_role` key, not the `anon` one) as environment variables.
+
+Render's disk is ephemeral, which is exactly why logo uploads need
+`SupabaseStorage` rather than `LocalDiskStorage` in production — a file
+written to Render's local disk disappears on the next deploy.
 
 ## Running it
 
