@@ -5,6 +5,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
     database_url: str = 'postgresql+asyncpg://kithnest:kithnest@localhost:5433/kithnest'
+
+    # Deliberately independent of `database_url` — the app's DATABASE_URL can
+    # point at a real, shared Supabase project, and the test suite must never
+    # be able to touch that by inheriting it. Tests always run against local
+    # Docker Postgres, full stop. See tests/conftest.py.
+    test_database_url: str = 'postgresql+asyncpg://kithnest:kithnest@localhost:5433/kithnest_test'
+
     jwt_secret: str = 'dev-only-secret-change-me'
     jwt_algorithm: str = 'HS256'
     jwt_expires_minutes: int = 60 * 24 * 7  # 7 days

@@ -62,11 +62,16 @@ source .venv/bin/activate
 pytest -v
 ```
 
-Tests run against a **separate `kithnest_test` database**, created
-automatically on first run — never the `kithnest` database you're actually
-using to click through the app. (An earlier version of this suite truncated
-the shared dev database between tests and once wiped out a real,
-manually-created account — don't reintroduce that.)
+Tests always run against **local Docker Postgres** (`test_database_url` in
+`app/config.py`, a separate `kithnest_test` database created automatically on
+first run) and a **throwaway temp directory** for file uploads — both fully
+independent of whatever `DATABASE_URL`/`SUPABASE_URL` the app itself is
+configured with in `.env`. That matters now that `.env` can point at a real
+Supabase project: without this separation, running the suite would silently
+create data in — or, for storage, actually upload files to — the real thing.
+(Both have happened once already during development. Don't reintroduce it —
+if you touch `tests/conftest.py`, keep the local-only assertion and the
+storage override intact.)
 
 ## Endpoints
 
