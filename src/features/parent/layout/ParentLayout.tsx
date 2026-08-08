@@ -39,7 +39,7 @@ export default function ParentLayout() {
     <div className="flex min-h-svh bg-ink-50">
       <ParentSidebar />
 
-      <div className="flex min-h-svh flex-1 flex-col">
+      <div className="flex min-h-svh min-w-0 flex-1 flex-col">
         <ParentTopBar />
         <OfflineBanner isOffline={isOffline} />
         <main className="flex-1 px-5 pb-8 pt-4 sm:px-8 lg:px-10 lg:py-8">

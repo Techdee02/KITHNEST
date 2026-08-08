@@ -104,43 +104,47 @@ export default function WorkloadVisualization() {
         </span>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        <button
-          type="button"
-          onClick={() => setActiveDay('all')}
-          className={cn(
-            'shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-semibold transition-colors',
-            activeDay === 'all' ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 text-ink-500',
-          )}
-        >
-          All days
-        </button>
-        {DAYS.map((day) => {
-          const dayItems = weekItems.filter((i) => i.weekday === day)
-          const active = activeDay === day
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => setActiveDay(day)}
-              className={cn(
-                'flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-3.5 py-2 text-xs font-semibold transition-colors',
-                active ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 text-ink-500',
-              )}
-            >
-              {day}
-              <span className="flex gap-0.5">
-                {dayItems.length === 0 ? (
-                  <span className="h-1.5 w-1.5 rounded-full bg-ink-200" />
-                ) : (
-                  dayItems.map((i) => (
-                    <span key={i.id} className={cn('h-1.5 w-1.5 rounded-full', dayStatusColor[i.status])} />
-                  ))
+      <div className="relative">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <button
+            type="button"
+            onClick={() => setActiveDay('all')}
+            className={cn(
+              'shrink-0 rounded-2xl border px-3.5 py-2 text-xs font-semibold transition-colors',
+              activeDay === 'all' ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 text-ink-500',
+            )}
+          >
+            All days
+          </button>
+          {DAYS.map((day) => {
+            const dayItems = weekItems.filter((i) => i.weekday === day)
+            const active = activeDay === day
+            return (
+              <button
+                key={day}
+                type="button"
+                onClick={() => setActiveDay(day)}
+                className={cn(
+                  'flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-3.5 py-2 text-xs font-semibold transition-colors',
+                  active ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 text-ink-500',
                 )}
-              </span>
-            </button>
-          )
-        })}
+              >
+                {day}
+                <span className="flex gap-0.5">
+                  {dayItems.length === 0 ? (
+                    <span className="h-1.5 w-1.5 rounded-full bg-ink-200" />
+                  ) : (
+                    dayItems.map((i) => (
+                      <span key={i.id} className={cn('h-1.5 w-1.5 rounded-full', dayStatusColor[i.status])} />
+                    ))
+                  )}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        {/* Fades the trailing edge so a peeking pill reads as "scroll for more", not a layout bug. */}
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-ink-50 to-transparent sm:hidden" />
       </div>
 
       {visibleItems.length > 0 ? (
