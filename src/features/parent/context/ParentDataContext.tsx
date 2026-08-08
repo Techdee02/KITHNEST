@@ -114,7 +114,7 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
 
   const [lastSyncedAt, setLastSyncedAt] = useLocalStorageState(
     'kithnest.parent.lastSynced',
-    '2026-07-18T08:12:00',
+    '2026-08-08T08:12:00',
   )
   const [isOffline, setIsOffline] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)

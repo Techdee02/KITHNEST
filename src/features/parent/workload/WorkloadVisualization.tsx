@@ -10,7 +10,7 @@ import { cn } from '../../../design-system/cn'
 import type { WorkloadItem } from '../../../lib/types'
 
 const DAYS: WorkloadItem['weekday'][] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-const WEEK_CUTOFF = '2026-07-19'
+const WEEK_CUTOFF = '2026-08-09'
 
 const dayStatusColor: Record<WorkloadItem['status'], string> = {
   completed: 'bg-teal-500',

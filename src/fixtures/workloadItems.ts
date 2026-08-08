@@ -1,7 +1,7 @@
 import type { WorkloadItem } from '../lib/types'
 
-// "Today" in this demo is Saturday 18 July 2026 — the week just finished
-// runs Mon 13 – Fri 17 July, and the upcoming week starts Mon 20 July.
+// "Today" in this demo is Saturday 8 August 2026 — the week just finished
+// runs Mon 3 – Fri 7 August, and the upcoming week starts Mon 10 August.
 export const workloadItems: WorkloadItem[] = [
   // Zainab — Primary 3, Sunflower Class
   {
@@ -12,7 +12,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Practice sheet covering the 3 and 4 times tables, 20 questions.',
     type: 'assignment',
     weekday: 'Mon',
-    dueDate: '2026-07-13',
+    dueDate: '2026-08-03',
     status: 'completed',
   },
   {
@@ -23,7 +23,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Read and match words containing "sh", "ch", and "th" sounds.',
     type: 'classwork',
     weekday: 'Tue',
-    dueDate: '2026-07-14',
+    dueDate: '2026-08-04',
     status: 'completed',
   },
   {
@@ -34,7 +34,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Label the roots, stem, leaves, and flower on the printed diagram.',
     type: 'classwork',
     weekday: 'Wed',
-    dueDate: '2026-07-15',
+    dueDate: '2026-08-05',
     status: 'completed',
   },
   {
@@ -45,7 +45,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Write six sentences about what she did over the weekend.',
     type: 'assignment',
     weekday: 'Thu',
-    dueDate: '2026-07-16',
+    dueDate: '2026-08-06',
     status: 'overdue',
   },
   {
@@ -56,7 +56,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Continue each pattern and explain the rule used.',
     type: 'classwork',
     weekday: 'Fri',
-    dueDate: '2026-07-17',
+    dueDate: '2026-08-07',
     status: 'completed',
   },
   {
@@ -67,7 +67,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Bring recycled materials for the class collage — due Monday.',
     type: 'project',
     weekday: 'Mon',
-    dueDate: '2026-07-20',
+    dueDate: '2026-08-10',
     status: 'upcoming',
   },
   {
@@ -78,7 +78,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Covers halves, quarters, and simple fraction comparisons.',
     type: 'test',
     weekday: 'Wed',
-    dueDate: '2026-07-22',
+    dueDate: '2026-08-12',
     status: 'upcoming',
   },
   {
@@ -89,7 +89,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'One page of joined cursive handwriting practice.',
     type: 'classwork',
     weekday: 'Thu',
-    dueDate: '2026-07-23',
+    dueDate: '2026-08-13',
     status: 'upcoming',
   },
 
@@ -102,7 +102,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Trace and sound out the letters with a parent at home.',
     type: 'classwork',
     weekday: 'Mon',
-    dueDate: '2026-07-13',
+    dueDate: '2026-08-03',
     status: 'completed',
   },
   {
@@ -113,7 +113,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Count everyday objects at home and draw them in the workbook.',
     type: 'classwork',
     weekday: 'Wed',
-    dueDate: '2026-07-15',
+    dueDate: '2026-08-05',
     status: 'completed',
   },
   {
@@ -124,7 +124,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Colour the family picture and bring it back Friday.',
     type: 'classwork',
     weekday: 'Fri',
-    dueDate: '2026-07-17',
+    dueDate: '2026-08-07',
     status: 'overdue',
   },
   {
@@ -135,7 +135,7 @@ export const workloadItems: WorkloadItem[] = [
     description: 'Practice straight lines, curves, and zig-zags in the workbook.',
     type: 'classwork',
     weekday: 'Tue',
-    dueDate: '2026-07-21',
+    dueDate: '2026-08-11',
     status: 'upcoming',
   },
 ]
