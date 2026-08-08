@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useParentData } from '../context/ParentDataContext'
 import { fakeFetch } from '../../../lib/fakeFetch'
 import { timeOfDayGreeting } from '../../../lib/greeting'
-import { firstNameOf } from '../../../lib/parentName'
+import { formalNameOf } from '../../../lib/parentName'
 import { subjects } from '../../../fixtures/subjects'
 import { WorkloadCard } from '../components/WorkloadCard'
 import { NotificationRow } from '../components/NotificationRow'
@@ -92,7 +92,7 @@ export default function ParentDashboard() {
       <div>
         <p className="text-sm text-ink-500">{timeOfDayGreeting()},</p>
         <h1 className="font-display text-2xl font-semibold text-ink-900">
-          {firstNameOf(parentName)}
+          {formalNameOf(parentName)}
         </h1>
         {selectedPupil && (
           <p className="mt-1 text-sm text-ink-500">
