@@ -5,6 +5,7 @@ import { Icon } from './Icon'
 import { LanguageSelector } from './LanguageSelector'
 import { fetchInsight, fetchSpeech, type InsightKind, type Language } from '../../lib/aiClient'
 import { ApiError } from '../../lib/apiClient'
+import { useLocalStorageState } from '../../lib/useLocalStorageState'
 
 interface AiInsightCardProps {
   kind: InsightKind
@@ -14,18 +15,23 @@ interface AiInsightCardProps {
   showVoiceButton?: boolean
 }
 
+type VoiceState = 'idle' | 'loading' | 'playing' | 'paused' | 'unavailable'
+
 export function AiInsightCard({ kind, title, context, showVoiceButton }: AiInsightCardProps) {
-  const [language, setLanguage] = useState<Language>('en')
-  const [summary, setSummary] = useState<string | null>(null)
+  // Persisted per insight kind, so a generated summary survives navigating away
+  // and back (e.g. Dashboard -> Workload -> Dashboard) instead of resetting.
+  const [language, setLanguage] = useLocalStorageState<Language>(`kithnest.ai.language.${kind}`, 'en')
+  const [summary, setSummary] = useLocalStorageState<string | null>(`kithnest.ai.summary.${kind}`, null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [voiceState, setVoiceState] = useState<'idle' | 'loading' | 'playing' | 'unavailable'>('idle')
+  const [voiceState, setVoiceState] = useState<VoiceState>('idle')
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   async function handleGenerate() {
     setIsLoading(true)
     setError(null)
+    audioRef.current?.pause()
     setVoiceState('idle')
     try {
       const { summary } = await fetchInsight(kind, language, context)
@@ -37,8 +43,20 @@ export function AiInsightCard({ kind, title, context, showVoiceButton }: AiInsig
     }
   }
 
-  async function handleListen() {
+  async function handleVoiceToggle() {
     if (!summary) return
+
+    if (voiceState === 'playing') {
+      audioRef.current?.pause()
+      setVoiceState('paused')
+      return
+    }
+    if (voiceState === 'paused') {
+      await audioRef.current?.play()
+      setVoiceState('playing')
+      return
+    }
+
     setVoiceState('loading')
     try {
       const blob = await fetchSpeech(summary, language)
@@ -75,9 +93,15 @@ export function AiInsightCard({ kind, title, context, showVoiceButton }: AiInsig
         </Button>
 
         {showVoiceButton && summary && (
-          <Button variant="ghost" size="sm" onClick={handleListen} disabled={voiceState === 'loading'}>
-            <Icon name="volume" className="h-3.5 w-3.5" />
-            {voiceState === 'loading' ? 'Loading audio…' : voiceState === 'playing' ? 'Playing…' : 'Listen to summary'}
+          <Button variant="ghost" size="sm" onClick={handleVoiceToggle} disabled={voiceState === 'loading'}>
+            <Icon name={voiceState === 'playing' ? 'pause' : 'volume'} className="h-3.5 w-3.5" />
+            {voiceState === 'loading'
+              ? 'Loading audio…'
+              : voiceState === 'playing'
+                ? 'Pause'
+                : voiceState === 'paused'
+                  ? 'Resume'
+                  : 'Listen to summary'}
           </Button>
         )}
       </div>

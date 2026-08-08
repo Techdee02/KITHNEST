@@ -33,6 +33,7 @@ export type IconName =
   | 'copy'
   | 'send'
   | 'volume'
+  | 'pause'
 
 const paths: Record<IconName, ReactElement> = {
   home: (
@@ -209,6 +210,12 @@ const paths: Record<IconName, ReactElement> = {
       <path d="M5 9.5h3l4.5-4v13l-4.5-4H5z" />
       <path d="M15.5 9a4 4 0 0 1 0 6" />
       <path d="M18 6.5a8 8 0 0 1 0 11" />
+    </>
+  ),
+  pause: (
+    <>
+      <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+      <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
     </>
   ),
 }
