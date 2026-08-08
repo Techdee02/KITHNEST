@@ -4,13 +4,25 @@ import { useParentData } from '../context/ParentDataContext'
 import { ParentTopBar } from '../components/ParentTopBar'
 import { ParentBottomNav } from '../components/ParentBottomNav'
 import { ParentSidebar } from '../components/ParentSidebar'
+import { MobilePreviewOverlay } from '../components/MobilePreviewOverlay'
 import { OfflineBanner } from '../../../design-system/components/OfflineBanner'
 import { Toast } from '../../../design-system/components/Toast'
 import { ChatWidget } from '../../../design-system/components/ChatWidget'
 
 export default function ParentLayout() {
-  const { isOffline, syncError, dismissSyncError, syncNow, parentName, selectedPupil, workloadForSelectedPupil, notifications, linkedSchool } =
-    useParentData()
+  const {
+    isOffline,
+    syncError,
+    dismissSyncError,
+    syncNow,
+    parentName,
+    selectedPupil,
+    workloadForSelectedPupil,
+    notifications,
+    linkedSchool,
+    isMobilePreview,
+    toggleMobilePreview,
+  } = useParentData()
 
   const chatContext = useMemo(
     () => ({
@@ -40,6 +52,7 @@ export default function ParentLayout() {
 
       <Toast message={syncError} onDismiss={dismissSyncError} onRetry={syncNow} />
       <ChatWidget persona="parent" context={chatContext} />
+      {isMobilePreview && <MobilePreviewOverlay onClose={toggleMobilePreview} />}
     </div>
   )
 }

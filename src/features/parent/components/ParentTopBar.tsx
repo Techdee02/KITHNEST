@@ -19,8 +19,10 @@ export function ParentTopBar() {
     syncNow,
     toggleOffline,
     linkedSchool,
+    toggleMobilePreview,
   } = useParentData()
   const [switcherOpen, setSwitcherOpen] = useState(false)
+  const isInPreviewFrame = window.self !== window.top
 
   return (
     <header className="sticky top-0 z-20 border-b border-ink-100 bg-ink-50/95 backdrop-blur">
@@ -29,18 +31,31 @@ export function ParentTopBar() {
           <div className="flex items-center gap-1.5">
             <Logomark className="h-6 w-6" />
           </div>
-          <button
-            type="button"
-            onClick={toggleOffline}
-            className={cn(
-              'flex items-center gap-1 rounded-pill px-2.5 py-1 text-[0.65rem] font-semibold transition-colors',
-              isOffline ? 'bg-ink-900 text-white' : 'bg-ink-100 text-ink-400 hover:text-ink-600',
+          <div className="flex items-center gap-1.5">
+            {!isInPreviewFrame && (
+              <button
+                type="button"
+                onClick={toggleMobilePreview}
+                className="flex items-center gap-1 rounded-pill bg-ink-100 px-2.5 py-1 text-[0.65rem] font-semibold text-ink-400 transition-colors hover:text-ink-600"
+                title="Demo control — preview the mobile layout"
+              >
+                <Icon name="phone" className="h-3 w-3" />
+                Mobile view
+              </button>
             )}
-            title="Demo control — simulate offline"
-          >
-            <Icon name="wifi-off" className="h-3 w-3" />
-            {isOffline ? 'Offline' : 'Simulate offline'}
-          </button>
+            <button
+              type="button"
+              onClick={toggleOffline}
+              className={cn(
+                'flex items-center gap-1 rounded-pill px-2.5 py-1 text-[0.65rem] font-semibold transition-colors',
+                isOffline ? 'bg-ink-900 text-white' : 'bg-ink-100 text-ink-400 hover:text-ink-600',
+              )}
+              title="Demo control — simulate offline"
+            >
+              <Icon name="wifi-off" className="h-3 w-3" />
+              {isOffline ? 'Offline' : 'Simulate offline'}
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between">

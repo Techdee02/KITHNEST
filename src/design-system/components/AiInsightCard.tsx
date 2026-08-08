@@ -3,7 +3,7 @@ import { Card } from './Card'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { LanguageSelector } from './LanguageSelector'
-import { fetchInsight, fetchSpeech, type InsightKind, type Language } from '../../lib/aiClient'
+import { fetchInsight, fetchSpeech, insightStorageKeys, type InsightKind, type Language } from '../../lib/aiClient'
 import { ApiError } from '../../lib/apiClient'
 import { useLocalStorageState } from '../../lib/useLocalStorageState'
 
@@ -20,8 +20,11 @@ type VoiceState = 'idle' | 'loading' | 'playing' | 'paused' | 'unavailable'
 export function AiInsightCard({ kind, title, context, showVoiceButton }: AiInsightCardProps) {
   // Persisted per insight kind, so a generated summary survives navigating away
   // and back (e.g. Dashboard -> Workload -> Dashboard) instead of resetting.
-  const [language, setLanguage] = useLocalStorageState<Language>(`kithnest.ai.language.${kind}`, 'en')
-  const [summary, setSummary] = useLocalStorageState<string | null>(`kithnest.ai.summary.${kind}`, null)
+  // Cleared on logout (see ParentDataContext/SchoolDataContext) so the next
+  // person to log in never sees a stale summary about someone else's data.
+  const storageKeys = insightStorageKeys(kind)
+  const [language, setLanguage] = useLocalStorageState<Language>(storageKeys.language, 'en')
+  const [summary, setSummary] = useLocalStorageState<string | null>(storageKeys.summary, null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

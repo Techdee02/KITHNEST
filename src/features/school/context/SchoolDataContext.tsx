@@ -3,6 +3,7 @@ import { classes as allClasses } from '../../../fixtures/classes'
 import { rosterForClass } from '../../../fixtures/rosterEntries'
 import { engagementMetrics, totalConnectedParents, totalPupils } from '../../../fixtures/engagementMetrics'
 import { apiFetch, ApiError, resolveApiUrl } from '../../../lib/apiClient'
+import { clearPersistedInsight } from '../../../lib/aiClient'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import type { ClassRoom, RegisteredSchool, RosterEntry } from '../../../lib/types'
 
@@ -171,6 +172,7 @@ export function SchoolDataProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     setToken(null)
     setSchool(null)
+    clearPersistedInsight('school_engagement')
   }, [setToken])
 
   const uploadLogo = useCallback(

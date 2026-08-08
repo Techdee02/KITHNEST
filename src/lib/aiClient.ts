@@ -9,6 +9,20 @@ export interface ChatMessage {
   content: string
 }
 
+/** Keys AiInsightCard persists a generated summary under — shared so logout can clear them. */
+export function insightStorageKeys(kind: InsightKind) {
+  return {
+    summary: `kithnest.ai.summary.${kind}`,
+    language: `kithnest.ai.language.${kind}`,
+  }
+}
+
+export function clearPersistedInsight(kind: InsightKind) {
+  const keys = insightStorageKeys(kind)
+  window.localStorage.removeItem(keys.summary)
+  window.localStorage.removeItem(keys.language)
+}
+
 export function fetchInsight(kind: InsightKind, language: Language, context: Record<string, unknown>) {
   return apiFetch<{ summary: string }>('/ai/insight', {
     method: 'POST',

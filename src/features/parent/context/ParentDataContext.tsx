@@ -5,6 +5,7 @@ import { classes as allClasses } from '../../../fixtures/classes'
 import { workloadForPupil } from '../../../fixtures/workloadItems'
 import { fakeFetch } from '../../../lib/fakeFetch'
 import { apiFetch, ApiError } from '../../../lib/apiClient'
+import { clearPersistedInsight } from '../../../lib/aiClient'
 import { useLocalStorageState } from '../../../lib/useLocalStorageState'
 import type { NotificationItem, Pupil, WorkloadItem } from '../../../lib/types'
 
@@ -87,6 +88,10 @@ interface ParentDataValue {
   isSyncing: boolean
   syncError: string | null
   dismissSyncError: () => void
+
+  /** Demo control — lets a laptop presenter preview the phone layout without a real device. */
+  isMobilePreview: boolean
+  toggleMobilePreview: () => void
 }
 
 const ParentDataContext = createContext<ParentDataValue | null>(null)
@@ -117,6 +122,7 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     '2026-08-08T08:12:00',
   )
   const [isOffline, setIsOffline] = useState(false)
+  const [isMobilePreview, setIsMobilePreview] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
 
@@ -179,6 +185,7 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false)
     setSchoolCode(null)
     setLinkedSchool(null)
+    clearPersistedInsight('parent_progress')
   }, [setIsAuthenticated, setSchoolCode])
 
   const pupils = useMemo(
@@ -220,6 +227,7 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
   const refreshNotifications = useCallback(() => setNotificationsFetchToken((t) => t + 1), [])
 
   const toggleOffline = useCallback(() => setIsOffline((v) => !v), [])
+  const toggleMobilePreview = useCallback(() => setIsMobilePreview((v) => !v), [])
 
   const syncNow = useCallback(async () => {
     if (isOffline) return
@@ -264,6 +272,8 @@ export function ParentDataProvider({ children }: { children: ReactNode }) {
     isSyncing,
     syncError,
     dismissSyncError,
+    isMobilePreview,
+    toggleMobilePreview,
   }
 
   return <ParentDataContext.Provider value={value}>{children}</ParentDataContext.Provider>
